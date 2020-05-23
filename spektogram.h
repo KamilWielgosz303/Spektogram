@@ -2,6 +2,10 @@
 #define SPEKTOGRAM_H
 
 #include <QMainWindow>
+#include <QFileDialog>
+#include <QObject>
+#include <QDebug>
+#include "wavfile.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Spektogram; }
