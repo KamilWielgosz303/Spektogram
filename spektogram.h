@@ -6,6 +6,8 @@
 #include <QObject>
 #include <QDebug>
 #include "wavfile.h"
+#include <QPainter>
+#include <chart.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Spektogram; }
@@ -19,7 +21,14 @@ public:
     Spektogram(QWidget *parent = nullptr);
     ~Spektogram();
 
+private slots:
+    void on_actiondrawSpect_triggered();
+
 private:
     Ui::Spektogram *ui;
+    void paintEvent(QPaintEvent *event);
+    QVector<double> tempPlot;
+
+    Chart chart;
 };
 #endif // SPEKTOGRAM_H
