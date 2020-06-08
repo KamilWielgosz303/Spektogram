@@ -21,11 +21,14 @@ SOURCES += \
     wavfile.cpp
 
 HEADERS += \
+    WAV_PARSER.h \
     spektogram.h \
     wavfile.h
 
 FORMS += \
     spektogram.ui
+
+INCLUDEPATH += armadillo/include
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

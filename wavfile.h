@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QAudioFormat>
 #include <QtEndian>
+#include "WAV_PARSER.h"
 
 class WavFile : public QFile
 {
@@ -15,8 +16,7 @@ public:
     bool open(const QString &fileName);
     const QAudioFormat &fileFormat() const;
     qint64 headerLength() const;
-    quint64 lengthData;
-    quint16 channelsNumber;
+    WAV_HEADER header;
 
 private:
     bool readHeader();

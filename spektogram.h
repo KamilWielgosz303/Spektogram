@@ -5,6 +5,7 @@
 #include <QFileDialog>
 #include <QObject>
 #include <QDebug>
+#include <armadillo>
 #include "wavfile.h"
 
 QT_BEGIN_NAMESPACE
@@ -21,5 +22,10 @@ public:
 
 private:
     Ui::Spektogram *ui;
+    arma::cx_vec fftData;
+    QVector<double> magnitudeData;
+    QVector<double> phaseData;
+    QVector<double> fftWin;
+
 };
 #endif // SPEKTOGRAM_H
