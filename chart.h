@@ -19,15 +19,9 @@ class Chart
 {
 public:
     Chart();
-    void drawBarsData(QPainter &painter, QVector<double> &data);
-    void drawLogGrid(QPainter &painter, QRect geometry);
-    void drawLogData(QPainter &painter, QVector<double> &data);
-    void drawSemiLogData(QPainter &painter, QVector<double> &data);
-    void drawLinearGrid(QPainter &painter, QRect geometry);
-    void drawLinearData(QPainter &painter, QVector<double> &data);
-    void showMarkers(QPainter &painter, QVector<double> &data);
-    void showTimeWindow(QPainter &painter, QVector<double> &data);
-    void getMousePosition(int x, int y);
+    void drawSpectGrid(QPainter &painter, QRect geometry, int timeWindows, int Fs);
+    void drawSpectData(QPainter &painter, QVector<double> &data);
+    void pixelColor(double magnitude);
 
     int gridNumX=10, gridNumY=10;
     int minValueX=0, maxValueX=1024;
@@ -39,7 +33,7 @@ public:
     QColor backgroundColor=Qt::black;
     QColor gridColor=Qt::gray;
     QColor textColor=Qt::white;
-    QColor plotColor=Qt::cyan;
+    QColor pixColor=Qt::cyan;
     QColor markersColorA=Qt::red;
     QColor markersColorB=Qt::yellow;
 

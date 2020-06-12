@@ -33,8 +33,11 @@ private:
     QVector<double> fftWin;
     void paintEvent(QPaintEvent *event);
     QVector<double> tempPlot;
-
+    int Fs;
+    int timeWindows;
+    QVector<QVector<double>> magnitudes;
     Chart chart;
+    void drawSpektogram(int Fs,int timeWindows);
 
 };
 #endif // SPEKTOGRAM_H

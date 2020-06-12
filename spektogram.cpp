@@ -1,7 +1,7 @@
 #include "spektogram.h"
 #include "ui_spektogram.h"
 
-#define FFT_SIZE 4000
+#define FFT_SIZE 8000
 
 Spektogram::Spektogram(QWidget *parent)
     : QMainWindow(parent)
@@ -12,13 +12,13 @@ Spektogram::Spektogram(QWidget *parent)
     const QString fileName = QFileDialog::getOpenFileName(this, tr("Open WAV file"), "*.wav");
     WavFile file;
 
-
     fftWin.resize(FFT_SIZE);
     fftWin.fill(1);
     fftData.resize(FFT_SIZE);
     fftData.fill(1);
     magnitudeData.resize(FFT_SIZE);
     phaseData.resize(FFT_SIZE);
+    timeWindows = 0;
 
     if(file.open(fileName)){
         file.seek(file.headerLength());
@@ -38,7 +38,9 @@ Spektogram::Spektogram(QWidget *parent)
                  << file.bytesAvailable() << endl
                  << file.size();
         qDebug() << "Dlugosc:" << " " << ((file.size()-44)*1000)/file.header.bytesPerSec;
+        Fs = file.header.SamplesPerSec/2;
         for(int l = 0; !file.atEnd(); l++){
+            timeWindows++;
 
             sampleData.resize(FFT_SIZE);
             sampleData.fill(0);
@@ -47,7 +49,7 @@ Spektogram::Spektogram(QWidget *parent)
                     break;
                 }
 
-                file.read(buffer.data(),4);
+                file.read(buffer.data(),2);
                 s = reinterpret_cast<quint16*>(buffer.data());
                 sampleData[i]=*s/65536.0;
                 //qDebug() << sampleData[i];
@@ -59,27 +61,30 @@ Spektogram::Spektogram(QWidget *parent)
             }
             fftData=arma::fft(fftData);
             //fftData.print();
-            for(int i=0;i<FFT_SIZE/2; i++){
+            for(int i=0;i<FFT_SIZE; i++){
 
                 magnitudeData[i]=abs(fftData[static_cast<uint>(i)]);
                 phaseData[i]=arg(fftData[static_cast<uint>(i)]);
             }
             double max=*std::max_element(magnitudeData.begin(), magnitudeData.end());
-            for(int i=0;i<FFT_SIZE/2; i++){
+            for(int i=0;i<FFT_SIZE; i++){
 
                 magnitudeData[i]/=max;  //normalise
                 magnitudeData[i]+=0.01; //saturate -40 dB
 
+                magnitudeData[i]=20*log(magnitudeData[i]);  //skala decybelowa
+                //qDebug()<<"Elo"<<magnitudeData[i];
             }
-            qDebug()<< phaseData;
+            //qDebug()<<sampleData.length();
+            //sss++;
+            qDebug()<<timeWindows;
         }
 
 
 
     }
-    for(int i=0;i<2048;i++)
-        tempPlot.append(i);
 }
+
 
 Spektogram::~Spektogram()
 {
@@ -90,12 +95,10 @@ void Spektogram::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event)
     QPainter painter(this);
-    chart.drawLinearGrid(painter, centralWidget()->geometry());
-    qDebug()<<centralWidget()->geometry();
+    chart.drawSpectGrid(painter, centralWidget()->geometry());
+    //qDebug()<<centralWidget()->geometry();
     if(ui->actiondrawSpect->isChecked()){
-        chart.plotColor=Qt::red;
-        chart.drawLinearData(painter, tempPlot);
-        chart.plotColor=Qt::green;
+        chart.drawSpectData(painter,Fs,timeWindows,data);
         /*if(ui->selectInput1->isChecked()){
             chart.plotColor=Qt::red;
             chart.drawLinearData(painter, timeDataCh1);
@@ -111,5 +114,9 @@ void Spektogram::paintEvent(QPaintEvent *event)
     }
 }
 
+
+void Spektogram::drawSpektogram(int Fs,int timeWindows){
+
+}
 
 
