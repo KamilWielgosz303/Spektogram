@@ -20,7 +20,7 @@ class Chart
 public:
     Chart();
     void drawSpectGrid(QPainter &painter, QRect geometry, int timeWindows, int Fs);
-    void drawSpectData(QPainter &painter, QVector<double> &data);
+    void drawSpectData(QPainter &painter, QVector<QVector<double>> &magnitudes);
     void pixelColor(double magnitude);
 
     int gridNumX=10, gridNumY=10;
@@ -33,13 +33,13 @@ public:
     QColor backgroundColor=Qt::black;
     QColor gridColor=Qt::gray;
     QColor textColor=Qt::white;
-    QColor pixColor=Qt::cyan;
+    QColor pixColor=Qt::red;
     QColor markersColorA=Qt::red;
     QColor markersColorB=Qt::yellow;
 
 private:
     double dx, dy, dvx, dvy, dmkx, dmky;
-    int gx, gy, gw, gh, gmy;
+    int gx, gy, gw, gh, gmy, gystart, gxstart;
     double logTable[LOGMAX];
 
 };

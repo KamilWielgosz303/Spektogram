@@ -10,13 +10,22 @@ Chart::Chart()
 }
 void Chart::drawSpectGrid(QPainter &painter, QRect geometry , int timeWindows , int Fs)
 {
-    gx=geometry.x()+MX;
-    gy=geometry.y()+MY;
     gw=geometry.width()-(2*MX);
     gh=geometry.height()-(2*MY);
+    gx=geometry.x()+MX;
+    gy=geometry.y()+MY;
+    gxstart = MX+2;
+    gystart = MY+gh+24;
+
+    qDebug()<<gh;
+    qDebug()<<"Punkt poczatkowy osi x to "<<geometry.x();
+    qDebug()<<"Punkt poczatkowy osi y to "<<geometry.y();
 
     dx=gw/static_cast<double>(gridNumX);
     dy=gh/static_cast<double>(gridNumY);
+
+    maxValueX = timeWindows*1000;
+    maxValueY = Fs;
 
     QPen pen;
     pen.setWidth(1);
@@ -33,13 +42,13 @@ void Chart::drawSpectGrid(QPainter &painter, QRect geometry , int timeWindows , 
     painter.setPen(pen);
     painter.drawRect(gx, gy, gw, gh);
     // ----- grid ------------
-    pen.setStyle(Qt::DotLine);
-    pen.setWidth(1);
-    painter.setPen(pen);
-    for(int px=1; px<gridNumX; px++)
-        painter.drawLine(QLineF(gx+(px*dx), gy, gx+(px*dx), gy+gh));
-    for(int py=1; py<gridNumY; py++)
-        painter.drawLine(QLineF(gx, gy+(py*dy), gx+gw, gy+(py*dy)));
+    //pen.setStyle(Qt::DotLine);
+    //pen.setWidth(1);
+    //painter.setPen(pen);
+    //for(int px=1; px<gridNumX; px++)
+    //    painter.drawLine(QLineF(gx+(px*dx), gy, gx+(px*dx), gy+gh));
+    //for(int py=1; py<gridNumY; py++)
+    //    painter.drawLine(QLineF(gx, gy+(py*dy), gx+gw, gy+(py*dy)));
     // ------ desc ----------
     QFont font;
     font.setPointSize(8);
@@ -51,28 +60,35 @@ void Chart::drawSpectGrid(QPainter &painter, QRect geometry , int timeWindows , 
     for(int px=0; px<=gridNumX; px++)
         painter.drawText(QPointF(gx-(font.pointSize()/4)+px*dx, gy+gh+(font.pointSize()*2)), QString().sprintf("%d",static_cast<int>(minValueX+(dvx*px)/gridNumX)));
     for(int py=0; py<=gridNumY; py++)
-        painter.drawText(QPointF(gx-(font.pointSize()*4), gy+(font.pointSize()/2)+py*dy), QString().sprintf("%4.1f",(maxValueY-(dvy*py)/gridNumY)));
+        painter.drawText(QPointF(gx-(font.pointSize()*4), gy+(font.pointSize()/2)+py*dy), QString().sprintf("%d",static_cast<int>(maxValueY-(dvy*py)/gridNumY)));
 
 }
-void Chart::drawSpectData(QPainter &painter, QVector<double> &data)
+void Chart::drawSpectData(QPainter &painter, QVector<QVector<double>> &magnitudes)
 {
-    dx=gw/static_cast<double>(data.size());
-    dy=gh/(maxValueY-minValueY);
-    gmy=gy+(gh/2);
+    //dx=gw/static_cast<double>(data.size());
+    //dy=gh/(maxValueY-minValueY);
+    //gmy=gy+(gh/2);
+    //int k = 0;
 
-    qDebug() << data.size();
+    //qDebug() << data.size();
     QPen pen;
     pen.setStyle(Qt::SolidLine);
     pen.setColor(pixColor);
     pen.setWidth(2);
     painter.setPen(pen);
 
-    for(int i=1; i<1000; i++){
+    /*for(int i=1; i<1000; i++){
         for(int j=100;j<1000;j++){
             painter.drawPoint(gx+(i-1),gx+i*dx);
         }
         //painter.drawLine(QLineF(gx+(i-1)*dx, gmy-(data[i-1]*dy), gx+i*dx, gmy-(data[i]*dy)));
+    }*/
+    for(int i=0;i<gw/2;i++){
+        for(int j=0;j<gh/2;j++){
+            painter.drawPoint(gxstart+i,gystart-j);
+        }
     }
+
 }
 
 void Chart::pixelColor(double magnitude){

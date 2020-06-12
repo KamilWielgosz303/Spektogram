@@ -1,7 +1,7 @@
 #include "spektogram.h"
 #include "ui_spektogram.h"
 
-#define FFT_SIZE 8000
+#define FFT_SIZE 512              //Przy czestotliwosci 8000 rozdzielczosc czestotliwosciowa = 15,625 Hz        (8000/512)
 
 Spektogram::Spektogram(QWidget *parent)
     : QMainWindow(parent)
@@ -16,8 +16,8 @@ Spektogram::Spektogram(QWidget *parent)
     fftWin.fill(1);
     fftData.resize(FFT_SIZE);
     fftData.fill(1);
-    magnitudeData.resize(FFT_SIZE);
-    phaseData.resize(FFT_SIZE);
+    magnitudeData.resize(FFT_SIZE/2);
+    phaseData.resize(FFT_SIZE/2);
     timeWindows = 0;
 
     if(file.open(fileName)){
@@ -61,22 +61,24 @@ Spektogram::Spektogram(QWidget *parent)
             }
             fftData=arma::fft(fftData);
             //fftData.print();
-            for(int i=0;i<FFT_SIZE; i++){
+            for(int i=0;i<FFT_SIZE/2; i++){
 
                 magnitudeData[i]=abs(fftData[static_cast<uint>(i)]);
                 phaseData[i]=arg(fftData[static_cast<uint>(i)]);
             }
             double max=*std::max_element(magnitudeData.begin(), magnitudeData.end());
-            for(int i=0;i<FFT_SIZE; i++){
+            for(int i=0;i<FFT_SIZE/2; i++){
 
                 magnitudeData[i]/=max;  //normalise
                 magnitudeData[i]+=0.01; //saturate -40 dB
 
                 magnitudeData[i]=20*log(magnitudeData[i]);  //skala decybelowa
+
                 //qDebug()<<"Elo"<<magnitudeData[i];
             }
             //qDebug()<<sampleData.length();
             //sss++;
+            magnitudes.append(magnitudeData);
             qDebug()<<timeWindows;
         }
 
@@ -95,10 +97,11 @@ void Spektogram::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event)
     QPainter painter(this);
-    chart.drawSpectGrid(painter, centralWidget()->geometry());
+    //qDebug()<<magnitudes.at(1).at(4000);
+    chart.drawSpectGrid(painter, centralWidget()->geometry(),timeWindows,Fs);
     //qDebug()<<centralWidget()->geometry();
     if(ui->actiondrawSpect->isChecked()){
-        chart.drawSpectData(painter,Fs,timeWindows,data);
+        chart.drawSpectData(painter,magnitudes);
         /*if(ui->selectInput1->isChecked()){
             chart.plotColor=Qt::red;
             chart.drawLinearData(painter, timeDataCh1);
