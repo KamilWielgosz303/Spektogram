@@ -1,7 +1,7 @@
 #include "spektogram.h"
 #include "ui_spektogram.h"
 
-#define FFT_SIZE 512                        //Przy czestotliwosci 8000 rozdzielczosc czestotliwosciowa = 15,625 Hz        (8000/512)
+#define FFT_SIZE 512                      //Przy czestotliwosci 8000 rozdzielczosc czestotliwosciowa = 15,625 Hz        (8000/512)
 
 
 Spektogram::Spektogram(QWidget *parent)
@@ -71,8 +71,8 @@ Spektogram::Spektogram(QWidget *parent)
             double max=*std::max_element(magnitudeData.begin(), magnitudeData.end());
             for(int i=0;i<FFT_SIZE/2; i++){
 
-                magnitudeData[i]/=max;  //normalise
-                magnitudeData[i]+=0.01; //saturate -40 dB
+                //magnitudeData[i]/=max;  //normalise
+                //magnitudeData[i]+=0.01; //saturate -40 dB
 
                 magnitudeData[i]=20*log(magnitudeData[i]);  //skala decybelowa
 
@@ -163,7 +163,7 @@ void Spektogram::makePlot(){
     ui->customPlot->xAxis->setLabel("Time [ms]");
     ui->customPlot->yAxis->setLabel("Frequency [Hz]");
       colorMap->data()->setRange(QCPRange(0, czas), QCPRange(0, Fs));
-      colorMap->setInterpolate(false);
+      colorMap->setInterpolate(true);
 
       QCPColorScale *colorScale = new QCPColorScale(ui->customPlot);
       ui->customPlot->plotLayout()->addElement(0, 1, colorScale); // add it to the right of the main axis rect
