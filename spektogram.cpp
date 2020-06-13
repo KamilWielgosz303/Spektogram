@@ -71,10 +71,10 @@ Spektogram::Spektogram(QWidget *parent)
             double max=*std::max_element(magnitudeData.begin(), magnitudeData.end());
             for(int i=0;i<FFT_SIZE/2; i++){
 
-                //magnitudeData[i]/=max;  //normalise
+                magnitudeData[i]/=max;  //normalise
                 //magnitudeData[i]+=0.01; //saturate -40 dB
 
-                magnitudeData[i]=20*log(magnitudeData[i]);  //skala decybelowa
+                magnitudeData[i]=10*log(magnitudeData[i]);  //skala decybelowa
 
                 //qDebug()<<"Elo"<<magnitudeData[i];
             }
