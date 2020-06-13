@@ -25,16 +25,24 @@ public:
 private slots:
     void on_actiondrawSpect_triggered();
 
+    void makePlot();
 private:
     Ui::Spektogram *ui;
     arma::cx_vec fftData;
     QVector<double> magnitudeData;
+    QVector<double> tempMagn;
     QVector<double> phaseData;
     QVector<double> fftWin;
     void paintEvent(QPaintEvent *event);
-    QVector<double> tempPlot;
-
+    QVector<QVector<double>> magnitudes;
     Chart chart;
+    int Fs;                                         //Liczba próbek pliku wav
+    int liczba_okienY;                             //Dokladnosc w Hz , z jaka mozemy wyswietlac punkty spektogramu
+    int liczba_okienX;                               //Wynik dzielenia całego pliku na mniejsze okna
+    int czas;                                   //Pelny czas trwania utworu
+
+    void drawSpektogram(int Fs,int timeWindows);
+    int takeRightFreq(int freq,int fftsize,int F_s);
 
 };
 #endif // SPEKTOGRAM_H
