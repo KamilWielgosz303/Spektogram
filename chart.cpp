@@ -16,6 +16,7 @@ void Chart::drawSpectGrid(QPainter &painter, QRect geometry , int timeWindows , 
     gy=geometry.y()+MY;
     gxstart = MX+2;
     gystart = MY+gh+24;
+    this->Fs = Fs;
 
     qDebug()<<gh;
     qDebug()<<"Punkt poczatkowy osi x to "<<geometry.x();
@@ -23,6 +24,7 @@ void Chart::drawSpectGrid(QPainter &painter, QRect geometry , int timeWindows , 
 
     dx=gw/static_cast<double>(gridNumX);
     dy=gh/static_cast<double>(gridNumY);
+
 
     maxValueX = timeWindows*1000;
     maxValueY = Fs;
@@ -65,8 +67,14 @@ void Chart::drawSpectGrid(QPainter &painter, QRect geometry , int timeWindows , 
 }
 void Chart::drawSpectData(QPainter &painter, QVector<QVector<double>> &magnitudes)
 {
-    //dx=gw/static_cast<double>(data.size());
-    //dy=gh/(maxValueY-minValueY);
+    int freqMax = magnitudes.at(1).size();
+    int timeWindows = magnitudes.size();
+    QVector<double> temp;
+    for(int i=1;i<=Fs;i++){
+
+    }
+    dx=gw/timeWindows;
+    dy=gh/freqMax;
     //gmy=gy+(gh/2);
     //int k = 0;
 
@@ -74,7 +82,7 @@ void Chart::drawSpectData(QPainter &painter, QVector<QVector<double>> &magnitude
     QPen pen;
     pen.setStyle(Qt::SolidLine);
     pen.setColor(pixColor);
-    pen.setWidth(2);
+    pen.setWidth(1);
     painter.setPen(pen);
 
     /*for(int i=1; i<1000; i++){
@@ -83,9 +91,12 @@ void Chart::drawSpectData(QPainter &painter, QVector<QVector<double>> &magnitude
         }
         //painter.drawLine(QLineF(gx+(i-1)*dx, gmy-(data[i-1]*dy), gx+i*dx, gmy-(data[i]*dy)));
     }*/
-    for(int i=0;i<gw/2;i++){
-        for(int j=0;j<gh/2;j++){
-            painter.drawPoint(gxstart+i,gystart-j);
+    for(int i=0;i<timeWindows;i++){
+        for(int j=0;j<freqMax;j++){
+            for(int k=0;k<dx;k++){
+                pixelColor(magnitudes.at(i).at(j));
+                painter.drawPoint(static_cast<int>(gxstart+k+(k*dx)),gystart-j);
+            }
         }
     }
 

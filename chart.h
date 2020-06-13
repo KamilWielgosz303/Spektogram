@@ -39,7 +39,7 @@ public:
 
 private:
     double dx, dy, dvx, dvy, dmkx, dmky;
-    int gx, gy, gw, gh, gmy, gystart, gxstart;
+    int gx, gy, gw, gh, gmy, gystart, Fs, gxstart;
     double logTable[LOGMAX];
 
 };

@@ -25,10 +25,12 @@ public:
 private slots:
     void on_actiondrawSpect_triggered();
 
+    void makePlot();
 private:
     Ui::Spektogram *ui;
     arma::cx_vec fftData;
     QVector<double> magnitudeData;
+    QVector<double> tempMagn;
     QVector<double> phaseData;
     QVector<double> fftWin;
     void paintEvent(QPaintEvent *event);
@@ -37,7 +39,9 @@ private:
     int timeWindows;
     QVector<QVector<double>> magnitudes;
     Chart chart;
+
     void drawSpektogram(int Fs,int timeWindows);
+    int takeRightFreq(int freq,int fftsize,int F_s);
 
 };
 #endif // SPEKTOGRAM_H
