@@ -1,14 +1,14 @@
 #include "spektogram.h"
 #include "ui_spektogram.h"
 
-#define FFT_SIZE 512              //Przy czestotliwosci 8000 rozdzielczosc czestotliwosciowa = 15,625 Hz        (8000/512)
+#define FFT_SIZE 512                        //Przy czestotliwosci 8000 rozdzielczosc czestotliwosciowa = 15,625 Hz        (8000/512)
+
 
 Spektogram::Spektogram(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::Spektogram)
 {
     ui->setupUi(this);
-    Spektogram::makePlot();
     const QString dir;
     const QString fileName = QFileDialog::getOpenFileName(this, tr("Open WAV file"), "*.wav");
     WavFile file;
@@ -19,8 +19,8 @@ Spektogram::Spektogram(QWidget *parent)
     fftData.fill(1);
     magnitudeData.resize(FFT_SIZE/2);
     phaseData.resize(FFT_SIZE/2);
-    timeWindows = 0;
-    /*
+    liczba_okienX = 0;
+
     if(file.open(fileName)){
         file.seek(file.headerLength());
         //quint64 length = file.lengthData;
@@ -43,8 +43,7 @@ Spektogram::Spektogram(QWidget *parent)
         tempMagn.resize(Fs);
         tempMagn.fill(1);
         for(int l = 0; !file.atEnd(); l++){
-            timeWindows++;
-
+            liczba_okienX++;                                                      //Obliczam na ile czesci podzieli sie utwór
             sampleData.resize(FFT_SIZE);
             sampleData.fill(0);
             for(int i = 0; i<FFT_SIZE; i++){
@@ -80,21 +79,30 @@ Spektogram::Spektogram(QWidget *parent)
                 //qDebug()<<"Elo"<<magnitudeData[i];
             }
 
-            for(int j=1;j<FFT_SIZE;j++){
+            /*for(int j=1;j<FFT_SIZE;j++){
                tempMagn[takeRightFreq(j,FFT_SIZE,Fs)] = magnitudeData[j-1];
                qDebug()<<tempMagn[j-1];
-            }
+            }*/
 
             //qDebug()<<sampleData.length();
             //sss++;
             magnitudes.append(magnitudeData);
-            qDebug()<<timeWindows;
         }
+        czas = (FFT_SIZE*liczba_okienX)/10;
 
-
-
+        int fftsize = FFT_SIZE;
+        qDebug()<<2*Fs;
+        qDebug()<<fftsize;
+        float chujmnietrafia = (2*Fs)/static_cast<float>(fftsize);
+        qDebug()<<chujmnietrafia<<" <- rozdzielczosc czasowa";
+        float temp_liczba_okienY = (Fs)/chujmnietrafia;
+        qDebug()<<temp_liczba_okienY<< " <- liczba okien double";
+        liczba_okienY = static_cast<int>(temp_liczba_okienY);
+        qDebug()<<liczba_okienY<< " <- liczba okien int";
     }
-    */
+
+    Spektogram::makePlot();
+
 }
 
 
@@ -143,11 +151,18 @@ int Spektogram::takeRightFreq(int freq,int fftsize,int F_s){
 
 void Spektogram::makePlot(){
 
+    qDebug()<<"Liczba okien X "<<liczba_okienX;
+    qDebug()<<"Czas trwania utowru "<<czas;
+    qDebug()<<"Liczba okien Y "<<liczba_okienY;
+    qDebug()<<"Liczba probek "<<Fs;
+    qDebug()<<"Liczba okien X fft"<<magnitudes.length();
+    qDebug()<<"Liczba okien Y fft"<<magnitudes.at(0).length();
+
     QCPColorMap *colorMap = new QCPColorMap(ui->customPlot->xAxis, ui->customPlot->yAxis);
-    colorMap->data()->setSize(7, 4000);
+    colorMap->data()->setSize(liczba_okienX,liczba_okienY );
     ui->customPlot->xAxis->setLabel("Time [ms]");
     ui->customPlot->yAxis->setLabel("Frequency [Hz]");
-      colorMap->data()->setRange(QCPRange(0, 7), QCPRange(0, 4000));
+      colorMap->data()->setRange(QCPRange(0, czas), QCPRange(0, Fs));
       colorMap->setInterpolate(false);
 
       QCPColorScale *colorScale = new QCPColorScale(ui->customPlot);
@@ -158,13 +173,13 @@ void Spektogram::makePlot(){
 
 
       double x,y,z;
-      for (int xInd=0; xInd<7; ++xInd)
-        for (int yInd=0; yInd<4000; ++yInd){
+      for (int xInd=0; xInd<liczba_okienX; ++xInd)
+        for (int yInd=0; yInd<liczba_okienY; ++yInd){
             colorMap->data()->cellToCoord(xInd, yInd, &x, &y);
 
-            z = -xInd; // the B field strength of dipole radiation (modulo physical constants)
-            colorMap->data()->setCell(xInd, yInd, z);
-            qDebug()<<z;
+
+            colorMap->data()->setCell(xInd, yInd, magnitudes.at(xInd).at(yInd));
+            //qDebug()<<z;
         }
 
       colorMap->setGradient(QCPColorGradient::gpPolar);

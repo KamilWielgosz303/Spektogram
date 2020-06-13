@@ -34,11 +34,12 @@ private:
     QVector<double> phaseData;
     QVector<double> fftWin;
     void paintEvent(QPaintEvent *event);
-    QVector<double> tempPlot;
-    int Fs;
-    int timeWindows;
     QVector<QVector<double>> magnitudes;
     Chart chart;
+    int Fs;                                         //Liczba próbek pliku wav
+    int liczba_okienY;                             //Dokladnosc w Hz , z jaka mozemy wyswietlac punkty spektogramu
+    int liczba_okienX;                               //Wynik dzielenia całego pliku na mniejsze okna
+    int czas;                                   //Pelny czas trwania utworu
 
     void drawSpektogram(int Fs,int timeWindows);
     int takeRightFreq(int freq,int fftsize,int F_s);
