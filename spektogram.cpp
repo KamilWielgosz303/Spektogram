@@ -13,37 +13,7 @@ Spektogram::Spektogram(QWidget *parent)
     const QString fileName = QFileDialog::getOpenFileName(this, tr("Open WAV file"), "*.wav");
     WavFile file;
 
-    fftWin.resize(FFT_SIZE);
-    //fftWin.fill(1);                                       //Okno prostokątne
-
-
-
-
-    /*for(int i=0;i<FFT_SIZE;i++){
-        fftWin[i] = 0.5*(1-cos((2*M_PI*i)/FFT_SIZE-1));       //Okno Hanna
-    }*/
-
-
-
-
-    double alph = 0.53834;
-    double bet = 0.46164;
-    for(int i=0;i<FFT_SIZE;i++){
-        fftWin[i] = alph-(bet*cos((2*M_PI*i)/(FFT_SIZE-1)));             //Okno Hamminga
-    }
-
-
-
-
-    /*
-    double a0 = 1;
-    double a1 = 1.93;
-    double a2 = 1.29;                                                   //Okno flat-top o malej rozdzielczosci
-    double a3 = 0.388;
-    double a4 = 0.028;
-    for(int i=0;i<FFT_SIZE;i++){
-        fftWin[i] = a0-a1*cos((2*M_PI*i)/(FFT_SIZE-1))+a2*cos((4*M_PI*i)/(FFT_SIZE-1))-a3*cos((6*M_PI*i)/(FFT_SIZE-1))+a4*cos((8*M_PI*i)/(FFT_SIZE-1));
-    }*/
+    chooseWindow(1);
     fftData.resize(FFT_SIZE);
     fftData.fill(1);
     magnitudeData.resize(FFT_SIZE/2);
@@ -80,7 +50,7 @@ Spektogram::Spektogram(QWidget *parent)
                     break;
                 }
 
-                file.read(buffer.data(),2);
+                file.read(buffer.data(),1);
                 s = reinterpret_cast<quint16*>(buffer.data());
                 sampleData[i]=*s/65536.0;
                 //qDebug() << sampleData[i];
@@ -140,42 +110,6 @@ Spektogram::~Spektogram()
     delete ui;
 }
 
-void Spektogram::paintEvent(QPaintEvent *event)
-{
-    Q_UNUSED(event)
-    QPainter painter(this);
-    /*
-    //qDebug()<<magnitudes.at(1).at(4000);
-    chart.drawSpectGrid(painter, centralWidget()->geometry(),timeWindows,Fs);
-    //qDebug()<<centralWidget()->geometry();
-    if(ui->actiondrawSpect->isChecked()){
-        chart.drawSpectData(painter,magnitudes);
-        if(ui->selectInput1->isChecked()){
-            chart.plotColor=Qt::red;
-            chart.drawLinearData(painter, timeDataCh1);
-        }
-        if(ui->selectInput2->isChecked()){
-            chart.plotColor=Qt::green;
-            chart.drawLinearData(painter, timeDataCh2);
-        }
-        if(ui->selectInput3->isChecked()){
-            chart.plotColor=Qt::yellow;
-            chart.drawLinearData(painter, timeDataCh3);
-        }
-    }
-    */
-}
-
-
-void Spektogram::drawSpektogram(int Fs,int timeWindows){
-
-}
-
-int Spektogram::takeRightFreq(int freq,int fftsize,int F_s){
-    int rightFreq;
-    rightFreq = (freq*F_s)/fftsize;
-    return rightFreq;
-}
 
 
 void Spektogram::makePlot(){
@@ -201,7 +135,7 @@ void Spektogram::makePlot(){
       colorScale->axis()->setLabel("Amplituda [dB]");
 
 
-      double x,y,z;
+      double x,y;
       for (int xInd=0; xInd<liczba_okienX; ++xInd)
         for (int yInd=0; yInd<liczba_okienY; ++yInd){
             colorMap->data()->cellToCoord(xInd, yInd, &x, &y);
@@ -220,4 +154,79 @@ void Spektogram::makePlot(){
 
 }
 
+void Spektogram::chooseWindow(int i){
+    fftWin.resize(FFT_SIZE);
+    switch(i){
+    case 0:                          //Okno prostokątne
+    {
+        fftWin.fill(1);
+        break;
+    }
+    case 1:                          //Okno Hanna
+    {
+        for(int i=0;i<FFT_SIZE;i++){
+            fftWin[i] = 0.5*(1-cos((2*M_PI*i)/FFT_SIZE-1));
+        }
+        break;
+    }
+    case 2:                          //Okno Hamminga
+    {
+        double alph = 0.53834;
+        double bet = 0.46164;
+        for(int i=0;i<FFT_SIZE;i++){
+            fftWin[i] = alph-(bet*cos((2*M_PI*i)/(FFT_SIZE-1)));
+        }
+        break;
+    }
+    case 3:                         //Okno Barletta
+    {
+        for(int i=0;i<FFT_SIZE;i++){
+            fftWin[i]=1-abs((i-(FFT_SIZE-1)/2)/((FFT_SIZE-1)/2));
+        }
+        break;
+    }
+    case 4:                         //Okno Trójkątne
+    {
+        for(int i=0;i<FFT_SIZE;i++){
+            fftWin[i]=1-abs((i-(FFT_SIZE-1)/2)/(FFT_SIZE/2));
+        }
+        break;
+    }
+    case 5:                          //Okno Barletta-Hanna
+    {
+        double a0 = 0.62;
+        double a1 = 0.48;
+        double a2 = 0.38;
+        for(int i=0;i<FFT_SIZE;i++){
+            fftWin[i]=a0-a1*abs(i/(FFT_SIZE-1)-(1/2))-a2*cos((2*M_PI*i)/(FFT_SIZE-1));
+        }
+        break;
+    }
+    case 6:                         //Okno Blackmana
+    {
+        double a0 = 0.42;
+        double a1 = 0.5;
+        double a2 = 0.08;
+        for(int i=0;i<FFT_SIZE;i++){
+            fftWin[i]=a0-a1*cos((2*M_PI*i)/(FFT_SIZE-1))+a2*cos((4*M_PI*i)/(FFT_SIZE-1));
+        }
+        break;
+    }
+
+    case 11:                         //Okno flat-top o malej rozdzielczosci
+    {
+        double a0 = 1;
+        double a1 = 1.93;
+        double a2 = 1.29;
+        double a3 = 0.388;
+        double a4 = 0.028;
+        for(int i=0;i<FFT_SIZE;i++){
+            fftWin[i] = a0-a1*cos((2*M_PI*i)/(FFT_SIZE-1))+a2*cos((4*M_PI*i)/(FFT_SIZE-1))-a3*cos((6*M_PI*i)/(FFT_SIZE-1))+a4*cos((8*M_PI*i)/(FFT_SIZE-1));
+        }
+        break;
+    }
+    default:
+        break;
+    }
+}
 
