@@ -14,7 +14,36 @@ Spektogram::Spektogram(QWidget *parent)
     WavFile file;
 
     fftWin.resize(FFT_SIZE);
-    fftWin.fill(1);
+    //fftWin.fill(1);                                       //Okno prostokątne
+
+
+
+
+    /*for(int i=0;i<FFT_SIZE;i++){
+        fftWin[i] = 0.5*(1-cos((2*M_PI*i)/FFT_SIZE-1));       //Okno Hanna
+    }*/
+
+
+
+
+    double alph = 0.53834;
+    double bet = 0.46164;
+    for(int i=0;i<FFT_SIZE;i++){
+        fftWin[i] = alph-(bet*cos((2*M_PI*i)/(FFT_SIZE-1)));             //Okno Hamminga
+    }
+
+
+
+
+    /*
+    double a0 = 1;
+    double a1 = 1.93;
+    double a2 = 1.29;                                                   //Okno flat-top o malej rozdzielczosci
+    double a3 = 0.388;
+    double a4 = 0.028;
+    for(int i=0;i<FFT_SIZE;i++){
+        fftWin[i] = a0-a1*cos((2*M_PI*i)/(FFT_SIZE-1))+a2*cos((4*M_PI*i)/(FFT_SIZE-1))-a3*cos((6*M_PI*i)/(FFT_SIZE-1))+a4*cos((8*M_PI*i)/(FFT_SIZE-1));
+    }*/
     fftData.resize(FFT_SIZE);
     fftData.fill(1);
     magnitudeData.resize(FFT_SIZE/2);
