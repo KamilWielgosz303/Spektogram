@@ -27,6 +27,8 @@ private slots:
 
     void makePlot();
     void chooseWindow(int i);
+    void on_verticalSlider_valueChanged(int value);
+
 private:
     Ui::Spektogram *ui;
     arma::cx_vec fftData;

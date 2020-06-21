@@ -50,7 +50,7 @@ Spektogram::Spektogram(QWidget *parent)
                     break;
                 }
 
-                file.read(buffer.data(),1);
+                file.read(buffer.data(),2);
                 s = reinterpret_cast<quint16*>(buffer.data());
                 sampleData[i]=*s/65536.0;
                 //qDebug() << sampleData[i];
@@ -87,7 +87,7 @@ Spektogram::Spektogram(QWidget *parent)
             //sss++;
             magnitudes.append(magnitudeData);
         }
-        czas = (FFT_SIZE*liczba_okienX)/10;
+        czas = ((file.size()-44)*1000)/file.header.bytesPerSec;
 
         int fftsize = FFT_SIZE;
         qDebug()<<2*Fs;
@@ -126,7 +126,7 @@ void Spektogram::makePlot(){
     ui->customPlot->xAxis->setLabel("Time [ms]");
     ui->customPlot->yAxis->setLabel("Frequency [Hz]");
       colorMap->data()->setRange(QCPRange(0, czas), QCPRange(0, Fs));
-      colorMap->setInterpolate(true);
+      colorMap->setInterpolate(false);
 
       QCPColorScale *colorScale = new QCPColorScale(ui->customPlot);
       ui->customPlot->plotLayout()->addElement(0, 1, colorScale); // add it to the right of the main axis rect
@@ -230,3 +230,8 @@ void Spektogram::chooseWindow(int i){
     }
 }
 
+
+void Spektogram::on_verticalSlider_valueChanged(int value)
+{
+    ui->fftvalueLabel->setText(QString::number(value));
+}
