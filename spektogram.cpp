@@ -7,9 +7,13 @@ Spektogram::Spektogram(QWidget *parent)
     , ui(new Ui::Spektogram)
 {
     ui->setupUi(this);
-    ui->fftComboBox->addItems(QStringList{"512",
+    ui->fftComboBox->addItems(QStringList{"128",
+                                          "256",
+                                          "512",
                                           "1024",
-                                          "2048"});
+                                          "2048",
+                                          "4096",
+                                          "8192"});
 
     ui->oknoComboBox->addItems(QStringList{"Prostokątne",
                                            "Hanna",
@@ -18,15 +22,19 @@ Spektogram::Spektogram(QWidget *parent)
                                            "Trójkątne",
                                            "Barletta-Hanna",
                                            "Blackmana"});
+
+
+
+
+    interpol = false;                                                        //Domyslnie wylaczamy interpolacje
+    ui->fftComboBox->setCurrentIndex(2);
+    ui->oknoComboBox->setCurrentIndex(2);
     QString a = ui->fftComboBox->currentText();
     _fftSize = a.toInt();
     qDebug() << _fftSize;
     chooseWindow(ui->oknoComboBox->currentIndex());
     qDebug() << ui->oknoComboBox->currentIndex();
-    fftData.resize(_fftSize);
-    fftData.fill(1);
-    magnitudeData.resize(_fftSize/2);
-    phaseData.resize(_fftSize/2);
+
 }
 
 
@@ -144,17 +152,22 @@ void Spektogram::loadFile(){
     _Fs = _samplesPerSec/2;
     tempMagn.resize(_Fs);
     tempMagn.fill(1);
+    calculateFFT();
+    makePlot();
+
+    if(!ui->fftComboBox->isEnabled())
+        ui->fftComboBox->setEnabled(true);
+    if(!ui->oknoComboBox->isEnabled())
+        ui->oknoComboBox->setEnabled(true);
+
+    if(!ui->true_radioButton->isEnabled())
+        ui->true_radioButton->setEnabled(true);
+    if(!ui->false_radioButton->isEnabled())
+        ui->false_radioButton->setEnabled(true);
 }
 
 void Spektogram::on_actionDrawSpectogram_triggered()
 {
-/*     walidacja fft size oraz okno
-
-    func
-
-
-
-    */
     calculateFFT();
     makePlot();
 }
@@ -165,6 +178,12 @@ void Spektogram::calculateFFT(){
     quint16 byteToRead = _bitsPerSample/8;
     qDebug() << byteToRead;
     magnitudes.clear();
+    qDebug()<<_fftSize;
+
+    fftData.resize(_fftSize);
+    fftData.fill(1);
+    magnitudeData.resize(_fftSize/2);
+    phaseData.resize(_fftSize/2);
 
     QByteArray buffer;
     quint32 *sample;
@@ -185,6 +204,7 @@ void Spektogram::calculateFFT(){
                 sampleData[i]=*sample/65536.0;
             }
 
+
             for(int i=0;i<_fftSize; i++){
                 fftData[static_cast<uint>(i)].real(sampleData[i]*fftWin[i]);
                 fftData[static_cast<uint>(i)].imag(0);
@@ -197,6 +217,7 @@ void Spektogram::calculateFFT(){
                 phaseData[i]=arg(fftData[static_cast<uint>(i)]);
             }
 
+
             double max=*std::max_element(magnitudeData.begin(), magnitudeData.end());
 
             for(int i=0;i<fftSizeHalf; i++){
@@ -205,7 +226,9 @@ void Spektogram::calculateFFT(){
                 magnitudeData[i]=10*log(magnitudeData[i]);  //skala decybelowa
             }
 
+
             magnitudes.append(magnitudeData);
+
         }
 
         qDebug()<<2*_Fs;
@@ -225,19 +248,26 @@ void Spektogram::makePlot(){
     qDebug()<<"Liczba probek "<<_Fs;
     qDebug()<<"Liczba okien X fft"<<magnitudes.length();
     qDebug()<<"Liczba okien Y fft"<<magnitudes.at(0).length();
+    ui->customPlot->clearGraphs();
+    ui->customPlot->clearPlottables();
+    ui->customPlot->clearItems();
+
 
     QCPColorMap *colorMap = new QCPColorMap(ui->customPlot->xAxis, ui->customPlot->yAxis);
     colorMap->data()->setSize(_windowsX,_windowsY );
     ui->customPlot->xAxis->setLabel("Time [ms]");
     ui->customPlot->yAxis->setLabel("Frequency [Hz]");
       colorMap->data()->setRange(QCPRange(0, soundLength), QCPRange(0, _Fs));
-      colorMap->setInterpolate(false);
+      colorMap->setInterpolate(interpol);
 
-      QCPColorScale *colorScale = new QCPColorScale(ui->customPlot);
-      ui->customPlot->plotLayout()->addElement(0, 1, colorScale); // add it to the right of the main axis rect
-      colorScale->setType(QCPAxis::atRight); // scale shall be vertical bar with tick/axis labels right (actually atRight is already the default)
-      colorMap->setColorScale(colorScale); // associate the color map with the color scale
-      colorScale->axis()->setLabel("Amplituda [dB]");
+
+      QCPColorScale *amplitudy;
+      amplitudy = new QCPColorScale(ui->customPlot);                          //Legenda kolorow oznaczajacych amplitudy
+      ui->customPlot->plotLayout()->addElement(0, 1, amplitudy);
+      amplitudy->setType(QCPAxis::atRight);
+      amplitudy->axis()->setLabel("Amplituda [dB]");
+      colorMap->setColorScale(amplitudy); // associate the color map with the color scale
+
 
 
       double x,y;
@@ -251,5 +281,48 @@ void Spektogram::makePlot(){
       colorMap->setGradient(QCPColorGradient::gpPolar);
       colorMap->rescaleDataRange(true);
       ui->customPlot->rescaleAxes();
+      ui->customPlot->replot();
 
+      qDebug()<<"Narysowane";
+
+
+}
+
+
+
+void Spektogram::on_oknoComboBox_activated(int index)
+{
+    qDebug()<<"Index okna"<<index;
+    chooseWindow(index);
+    calculateFFT();
+    makePlot();
+}
+
+void Spektogram::on_fftComboBox_activated(const QString &arg1)
+{
+    QString temp = arg1;
+    _fftSize = temp.toInt();
+    qDebug()<<"Wybieram okno";
+    chooseWindow(ui->oknoComboBox->currentIndex());
+    qDebug()<<"Po wyborze okna rozmiar"<<_fftSize;
+    calculateFFT();
+    qDebug()<<"Po liczeniu fft";
+    makePlot();
+}
+
+void Spektogram::on_fftComboBox_currentIndexChanged(const QString &arg1)
+{
+
+}
+
+void Spektogram::on_true_radioButton_clicked()
+{
+    interpol = true;
+    makePlot();
+}
+
+void Spektogram::on_false_radioButton_clicked()
+{
+    interpol = false;
+    makePlot();
 }

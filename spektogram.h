@@ -10,6 +10,7 @@
 #include <armadillo>
 #include "wavfile.h"
 #include <QPainter>
+#include "qcustomplot.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Spektogram; }
@@ -30,6 +31,18 @@ private slots:
 
     void on_actionDrawSpectogram_triggered();
 
+    void on_fftComboBox_activated(const QString &arg1);
+
+    void on_fftComboBox_activated(int index);
+
+    void on_oknoComboBox_activated(int index);
+
+    void on_fftComboBox_currentIndexChanged(const QString &arg1);
+
+    void on_true_radioButton_clicked();
+
+    void on_false_radioButton_clicked();
+
 private:
     Ui::Spektogram *ui;
     WavFile file;
@@ -48,6 +61,8 @@ private:
     quint32 _bytesPerSec;
     quint16 _blockAlign;
     quint16 _bitsPerSample;
+
+    bool interpol;
 
     int _fftSize;                                //Przy czestotliwosci 8000 rozdzielczosc czestotliwosciowa = 15,625 Hz        (8000/512)
     void loadFile();

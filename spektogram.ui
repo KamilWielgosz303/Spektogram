@@ -62,6 +62,9 @@
           </item>
           <item>
            <widget class="QComboBox" name="oknoComboBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="maximumSize">
              <size>
               <width>120</width>
@@ -103,6 +106,9 @@
         </item>
         <item>
          <widget class="QComboBox" name="fftComboBox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="maximumSize">
            <size>
             <width>120</width>
@@ -150,7 +156,10 @@
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="radioButton_2">
+         <widget class="QRadioButton" name="true_radioButton">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="maximumSize">
            <size>
             <width>120</width>
@@ -168,10 +177,16 @@
           <property name="text">
            <string>TAK</string>
           </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="radioButton">
+         <widget class="QRadioButton" name="false_radioButton">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="maximumSize">
            <size>
             <width>120</width>
@@ -188,6 +203,9 @@
           </property>
           <property name="text">
            <string>NIE</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -206,7 +224,7 @@
      <x>0</x>
      <y>0</y>
      <width>1000</width>
-     <height>23</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>
