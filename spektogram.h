@@ -29,12 +29,15 @@ private slots:
     void chooseWindow(int i);
     void on_verticalSlider_valueChanged(int value);
 
-    void on_dial_valueChanged(int value);
+    //void on_dial_valueChanged(int value);
 
     void on_pushButton_clicked();
 
+    void on_actionNewFile_triggered();
+
 private:
     Ui::Spektogram *ui;
+    WavFile file;
     arma::cx_vec fftData;
     QVector<double> magnitudeData;
     QVector<double> tempMagn;
@@ -42,11 +45,15 @@ private:
     QVector<double> fftWin;
     QVector<QVector<double>> magnitudes;
     Chart chart;
-    int Fs;                                         //Liczba próbek pliku wav
-    int liczba_okienY;                             //Dokladnosc w Hz , z jaka mozemy wyswietlac punkty spektogramu
-    int liczba_okienX;                               //Wynik dzielenia całego pliku na mniejsze okna
-    int czas;                                   //Pelny czas trwania utworu
-
-
+    qint32 _Fs;                                         //Liczba próbek pliku wav
+    quint32 liczba_okienY;                             //Dokladnosc w Hz , z jaka mozemy wyswietlac punkty spektogramu
+    quint32 liczba_okienX;                               //Wynik dzielenia całego pliku na mniejsze okna
+    qint64 soundLength;
+    quint16 _numberChannels;
+    quint32 _samplesPerSec;
+    quint32 _bytesPerSec;
+    quint16 _blockAlign;
+    quint16 _bitsPerSample;
+    void loadFile();
 };
 #endif // SPEKTOGRAM_H

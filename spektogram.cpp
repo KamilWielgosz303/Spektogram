@@ -9,9 +9,7 @@ Spektogram::Spektogram(QWidget *parent)
     , ui(new Ui::Spektogram)
 {
     ui->setupUi(this);
-    const QString dir;
-    const QString fileName = QFileDialog::getOpenFileName(this, tr("Open WAV file"), "*.wav");
-    WavFile file;
+
 
     chooseWindow(1);
     fftData.resize(FFT_SIZE);
@@ -20,27 +18,10 @@ Spektogram::Spektogram(QWidget *parent)
     phaseData.resize(FFT_SIZE/2);
     liczba_okienX = 0;
 
-    if(file.open(fileName)){
-        file.seek(file.headerLength());
-        //quint64 length = file.lengthData;
-        QByteArray buffer;
-        quint16 *s;
-        QVector<double> sampleData;
-        qDebug() << sizeof(WAV_HEADER) << endl
-                 << file.header.AudioFormat << endl
-                 << file.header.NumOfChan << endl
-                 << file.header.SamplesPerSec << endl
-                 << file.header.bytesPerSec << endl
-                 << file.header.blockAlign << endl
-                 << file.header.bitsPerSample << endl
-                 << file.header.Subchunk2ID<< endl
-                 << file.header.Subchunk2Size << endl
-                 << file.bytesAvailable() << endl
-                 << file.size();
-        qDebug() << "Dlugosc:" << " " << ((file.size()-44)*1000)/file.header.bytesPerSec;
-        Fs = file.header.SamplesPerSec/2;
-        tempMagn.resize(Fs);
-        tempMagn.fill(1);
+
+    QByteArray buffer;
+    quint16 *s;
+    QVector<double> sampleData;
         for(int l = 0; !file.atEnd(); l++){
             liczba_okienX++;                                                      //Obliczam na ile czesci podzieli sie utwór
             sampleData.resize(FFT_SIZE);
@@ -87,18 +68,18 @@ Spektogram::Spektogram(QWidget *parent)
             //sss++;
             magnitudes.append(magnitudeData);
         }
-        czas = ((file.size()-44)*1000)/file.header.bytesPerSec;
+        soundLength = ((file.size()-44)*1000)/file.header.bytesPerSec;
 
         int fftsize = FFT_SIZE;
-        qDebug()<<2*Fs;
+        qDebug()<<2*_Fs;
         qDebug()<<fftsize;
-        float chujmnietrafia = (2*Fs)/static_cast<float>(fftsize);
+        float chujmnietrafia = (2*_Fs)/static_cast<float>(fftsize);
         qDebug()<<chujmnietrafia<<" <- rozdzielczosc czasowa";
-        float temp_liczba_okienY = (Fs)/chujmnietrafia;
+        float temp_liczba_okienY = (_Fs)/chujmnietrafia;
         qDebug()<<temp_liczba_okienY<< " <- liczba okien double";
         liczba_okienY = static_cast<int>(temp_liczba_okienY);
         qDebug()<<liczba_okienY<< " <- liczba okien int";
-    }
+
 
     Spektogram::makePlot();
 
@@ -115,9 +96,9 @@ Spektogram::~Spektogram()
 void Spektogram::makePlot(){
 
     qDebug()<<"Liczba okien X "<<liczba_okienX;
-    qDebug()<<"Czas trwania utowru "<<czas;
+    qDebug()<<"Czas trwania utowru "<<soundLength;
     qDebug()<<"Liczba okien Y "<<liczba_okienY;
-    qDebug()<<"Liczba probek "<<Fs;
+    qDebug()<<"Liczba probek "<<_Fs;
     qDebug()<<"Liczba okien X fft"<<magnitudes.length();
     qDebug()<<"Liczba okien Y fft"<<magnitudes.at(0).length();
 
@@ -125,7 +106,7 @@ void Spektogram::makePlot(){
     colorMap->data()->setSize(liczba_okienX,liczba_okienY );
     ui->customPlot->xAxis->setLabel("Time [ms]");
     ui->customPlot->yAxis->setLabel("Frequency [Hz]");
-      colorMap->data()->setRange(QCPRange(0, czas), QCPRange(0, Fs));
+      colorMap->data()->setRange(QCPRange(0, soundLength), QCPRange(0, _Fs));
       colorMap->setInterpolate(false);
 
       QCPColorScale *colorScale = new QCPColorScale(ui->customPlot);
@@ -243,4 +224,41 @@ void Spektogram::on_verticalSlider_valueChanged(int value)
 void Spektogram::on_pushButton_clicked()
 {
     ui->fftvalueLabel->setText("Dzialaj chuju");
+}
+
+void Spektogram::on_actiondrawSpect_triggered(){
+
+}
+
+void Spektogram::on_actionNewFile_triggered()
+{
+    const QString fileName = QFileDialog::getOpenFileName(this, tr("Open WAV file"), "*.wav");
+
+    if(file.open(fileName)){
+
+    }
+}
+
+void Spektogram::loadFile(){
+    file.seek(file.headerLength());
+    _numberChannels = file.header.NumOfChan;
+    _samplesPerSec = file.header.SamplesPerSec;
+    _bytesPerSec = file.header.bytesPerSec;
+    _blockAlign = file.header.blockAlign;
+    _bitsPerSample = file.header.bitsPerSample;
+    soundLength = ((file.size()-44)*1000)/file.header.bytesPerSec;
+    qDebug() << file.header.AudioFormat << endl
+             << _numberChannels << endl
+             << _samplesPerSec << endl
+             << _bytesPerSec << endl
+             << _blockAlign << endl
+             << _bitsPerSample << endl
+             << file.header.Subchunk2ID<< endl
+             << file.header.Subchunk2Size << endl
+             << file.bytesAvailable() << endl
+             << file.size();
+    qDebug() << "Dlugosc:" << soundLength;
+    _Fs = _samplesPerSec/2;
+    tempMagn.resize(_Fs);
+    tempMagn.fill(1);
 }
