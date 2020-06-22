@@ -231,7 +231,16 @@ void Spektogram::chooseWindow(int i){
 }
 
 
+
+
+
 void Spektogram::on_verticalSlider_valueChanged(int value)
 {
+    qDebug()<<"Ustawiam value";
     ui->fftvalueLabel->setText(QString::number(value));
+}
+
+void Spektogram::on_pushButton_clicked()
+{
+    ui->fftvalueLabel->setText("Dzialaj chuju");
 }

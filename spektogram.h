@@ -29,6 +29,10 @@ private slots:
     void chooseWindow(int i);
     void on_verticalSlider_valueChanged(int value);
 
+    void on_dial_valueChanged(int value);
+
+    void on_pushButton_clicked();
+
 private:
     Ui::Spektogram *ui;
     arma::cx_vec fftData;
