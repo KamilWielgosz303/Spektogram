@@ -102,7 +102,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="comboBox">
+         <widget class="QComboBox" name="fftComboBox">
           <property name="maximumSize">
            <size>
             <width>120</width>
@@ -222,6 +222,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionNewFile"/>
+   <addaction name="actionDrawSpectogram"/>
   </widget>
   <action name="actionNewFile">
    <property name="checkable">
@@ -229,6 +230,14 @@
    </property>
    <property name="text">
     <string>New File</string>
+   </property>
+  </action>
+  <action name="actionDrawSpectogram">
+   <property name="text">
+    <string>Draw</string>
+   </property>
+   <property name="toolTip">
+    <string>Draw</string>
    </property>
   </action>
  </widget>

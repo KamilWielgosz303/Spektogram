@@ -5,10 +5,11 @@
 #include <QFileDialog>
 #include <QObject>
 #include <QDebug>
+#include <QtMath>
+#include <QMessageBox>
 #include <armadillo>
 #include "wavfile.h"
 #include <QPainter>
-#include <chart.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Spektogram; }
@@ -23,37 +24,36 @@ public:
     ~Spektogram();
 
 private slots:
-    void on_actiondrawSpect_triggered();
-
-    void makePlot();
-    void chooseWindow(int i);
-    void on_verticalSlider_valueChanged(int value);
 
     //void on_dial_valueChanged(int value);
-
-    void on_pushButton_clicked();
-
     void on_actionNewFile_triggered();
+
+    void on_actionDrawSpectogram_triggered();
 
 private:
     Ui::Spektogram *ui;
     WavFile file;
     arma::cx_vec fftData;
-    QVector<double> magnitudeData;
-    QVector<double> tempMagn;
-    QVector<double> phaseData;
-    QVector<double> fftWin;
-    QVector<QVector<double>> magnitudes;
-    Chart chart;
+    QVector<qreal> magnitudeData;
+    QVector<qreal> tempMagn;
+    QVector<qreal> phaseData;
+    QVector<qreal> fftWin;
+    QVector<QVector<qreal>> magnitudes;
     qint32 _Fs;                                         //Liczba próbek pliku wav
-    quint32 liczba_okienY;                             //Dokladnosc w Hz , z jaka mozemy wyswietlac punkty spektogramu
-    quint32 liczba_okienX;                               //Wynik dzielenia całego pliku na mniejsze okna
+    int _windowsY;                             //Dokladnosc w Hz , z jaka mozemy wyswietlac punkty spektogramu
+    int _windowsX{0};                               //Wynik dzielenia całego pliku na mniejsze okna
     qint64 soundLength;
     quint16 _numberChannels;
     quint32 _samplesPerSec;
     quint32 _bytesPerSec;
     quint16 _blockAlign;
     quint16 _bitsPerSample;
+
+    int _fftSize;                                //Przy czestotliwosci 8000 rozdzielczosc czestotliwosciowa = 15,625 Hz        (8000/512)
     void loadFile();
+    void calculateFFT();
+    void makePlot();
+    void chooseWindow(int i);
+
 };
 #endif // SPEKTOGRAM_H
