@@ -33,7 +33,7 @@ private slots:
 
     void on_fftComboBox_activated(const QString &arg1);
 
-    void on_fftComboBox_activated(int index);
+    //void on_fftComboBox_activated(int index);
 
     void on_oknoComboBox_activated(int index);
 
@@ -63,7 +63,8 @@ private:
     quint16 _bitsPerSample;
 
     bool interpol;
-
+    QCPColorMap *colorMap;
+    QCPColorScale *amplitudy;
     int _fftSize;                                //Przy czestotliwosci 8000 rozdzielczosc czestotliwosciowa = 15,625 Hz        (8000/512)
     void loadFile();
     void calculateFFT();

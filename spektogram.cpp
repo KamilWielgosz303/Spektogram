@@ -34,12 +34,23 @@ Spektogram::Spektogram(QWidget *parent)
     qDebug() << _fftSize;
     chooseWindow(ui->oknoComboBox->currentIndex());
     qDebug() << ui->oknoComboBox->currentIndex();
+    colorMap = new QCPColorMap(ui->customPlot->xAxis, ui->customPlot->yAxis);
+    amplitudy = new QCPColorScale(ui->customPlot);
 
+    ui->customPlot->xAxis->setLabel("Time [ms]");
+    ui->customPlot->yAxis->setLabel("Frequency [Hz]");
+
+    ui->customPlot->plotLayout()->addElement(0, 1, amplitudy);
+    amplitudy->setType(QCPAxis::atRight);
+    amplitudy->axis()->setLabel("Amplituda [dB]");
+    colorMap->setColorScale(amplitudy); // associate the color map with the color scale
 }
 
 
 Spektogram::~Spektogram()
 {
+    delete colorMap;
+    delete amplitudy;
     delete ui;
 }
 
@@ -248,25 +259,19 @@ void Spektogram::makePlot(){
     qDebug()<<"Liczba probek "<<_Fs;
     qDebug()<<"Liczba okien X fft"<<magnitudes.length();
     qDebug()<<"Liczba okien Y fft"<<magnitudes.at(0).length();
-    ui->customPlot->clearGraphs();
-    ui->customPlot->clearPlottables();
-    ui->customPlot->clearItems();
+//    ui->customPlot->clearGraphs();
+//    ui->customPlot->clearPlottables();
+//    ui->customPlot->clearItems();
 
 
-    QCPColorMap *colorMap = new QCPColorMap(ui->customPlot->xAxis, ui->customPlot->yAxis);
+qDebug()<<"hhh";
     colorMap->data()->setSize(_windowsX,_windowsY );
-    ui->customPlot->xAxis->setLabel("Time [ms]");
-    ui->customPlot->yAxis->setLabel("Frequency [Hz]");
       colorMap->data()->setRange(QCPRange(0, soundLength), QCPRange(0, _Fs));
       colorMap->setInterpolate(interpol);
 
 
-      QCPColorScale *amplitudy;
-      amplitudy = new QCPColorScale(ui->customPlot);                          //Legenda kolorow oznaczajacych amplitudy
-      ui->customPlot->plotLayout()->addElement(0, 1, amplitudy);
-      amplitudy->setType(QCPAxis::atRight);
-      amplitudy->axis()->setLabel("Amplituda [dB]");
-      colorMap->setColorScale(amplitudy); // associate the color map with the color scale
+                          //Legenda kolorow oznaczajacych amplitudy
+
 
 
 
