@@ -201,7 +201,7 @@ void Spektogram::calculateFFT(){
                 }
                 file.read(buffer.data(),byteToRead);
                 sample = reinterpret_cast<quint32*>(buffer.data());
-                sampleData[i]=*sample/65536.0;
+                sampleData[i]=*sample;///65536.0;
             }
 
 
@@ -223,7 +223,7 @@ void Spektogram::calculateFFT(){
             for(int i=0;i<fftSizeHalf; i++){
 
                 magnitudeData[i]/=max;
-                magnitudeData[i]=10*log(magnitudeData[i]);  //skala decybelowa
+                magnitudeData[i]=20*log(magnitudeData[i]);  //skala decybelowa
             }
 
 
