@@ -33,11 +33,7 @@ private slots:
 
     void on_fftComboBox_activated(const QString &arg1);
 
-    //void on_fftComboBox_activated(int index);
-
     void on_oknoComboBox_activated(int index);
-
-    void on_fftComboBox_currentIndexChanged(const QString &arg1);
 
     void on_true_radioButton_clicked();
 
@@ -61,6 +57,7 @@ private:
     quint32 _bytesPerSec;
     quint16 _blockAlign;
     quint16 _bitsPerSample;
+    QVector<qreal> sampleData;
 
     bool interpol;
     QCPColorMap *colorMap;
@@ -70,6 +67,7 @@ private:
     void calculateFFT();
     void makePlot();
     void chooseWindow(int i);
+    void readDataFile();
 
 };
 #endif // SPEKTOGRAM_H

@@ -31,9 +31,7 @@ Spektogram::Spektogram(QWidget *parent)
     ui->oknoComboBox->setCurrentIndex(2);
     QString a = ui->fftComboBox->currentText();
     _fftSize = a.toInt();
-    qDebug() << _fftSize;
     chooseWindow(ui->oknoComboBox->currentIndex());
-    qDebug() << ui->oknoComboBox->currentIndex();
     colorMap = new QCPColorMap(ui->customPlot->xAxis, ui->customPlot->yAxis);
     amplitudy = new QCPColorScale(ui->customPlot);
 
@@ -57,19 +55,19 @@ Spektogram::~Spektogram()
 void Spektogram::chooseWindow(int i){
     fftWin.resize(_fftSize);
     switch(i){
-    case 0:                          //Okno prostokątne
+    case 0:                          // prostokątne
     {
         fftWin.fill(1);
         break;
     }
-    case 1:                          //Okno Hanna
+    case 1:                          // Hanna
     {
         for(int i=0;i<_fftSize;i++){
             fftWin[i] = 0.5*(1-cos((2*M_PI*i)/_fftSize-1));
         }
         break;
     }
-    case 2:                          //Okno Hamminga
+    case 2:                          // Hamminga
     {
         double alph = 0.53834;
         double bet = 0.46164;
@@ -78,21 +76,21 @@ void Spektogram::chooseWindow(int i){
         }
         break;
     }
-    case 3:                         //Okno Barletta
+    case 3:                         // Barletta
     {
         for(int i=0;i<_fftSize;i++){
             fftWin[i]=1-qFabs((i-(_fftSize-1)/2)/((_fftSize-1)/2));
         }
         break;
     }
-    case 4:                         //Okno Trójkątne
+    case 4:                         //Trójkątne
     {
         for(int i=0;i<_fftSize;i++){
             fftWin[i]=1-qFabs((i-(_fftSize-1)/2)/(_fftSize/2));
         }
         break;
     }
-    case 5:                          //Okno Barletta-Hanna
+    case 5:                          // Barletta-Hanna
     {
         double a0 = 0.62;
         double a1 = 0.48;
@@ -102,7 +100,7 @@ void Spektogram::chooseWindow(int i){
         }
         break;
     }
-    case 6:                         //Okno Blackmana
+    case 6:                         // Blackmana
     {
         double a0 = 0.42;
         double a1 = 0.5;
@@ -113,7 +111,7 @@ void Spektogram::chooseWindow(int i){
         break;
     }
 
-    case 11:                         //Okno flat-top o malej rozdzielczosci
+    case 11:                         // flat-top o malej rozdzielczosci
     {
         double a0 = 1;
         double a1 = 1.93;
@@ -130,16 +128,7 @@ void Spektogram::chooseWindow(int i){
     }
 }
 
-void Spektogram::on_actionNewFile_triggered()
-{
-    const QString fileName = QFileDialog::getOpenFileName(this, tr("Open WAV file"), "*.wav");
 
-    if(file.open(fileName)){
-        loadFile();
-    } else{
-        QMessageBox::warning(this,"Błąd","Błąd odczytu pliku.");
-    }
-}
 
 void Spektogram::loadFile(){
     file.seek(file.headerLength());
@@ -163,6 +152,7 @@ void Spektogram::loadFile(){
     _Fs = _samplesPerSec/2;
     tempMagn.resize(_Fs);
     tempMagn.fill(1);
+    readDataFile();
     calculateFFT();
     makePlot();
 
@@ -183,41 +173,62 @@ void Spektogram::on_actionDrawSpectogram_triggered()
     makePlot();
 }
 
+void Spektogram::readDataFile(){
+
+    quint16 byteToRead = _bitsPerSample/8;
+    magnitudes.clear();
+
+    QByteArray buffer;
+    sampleData.resize(static_cast<int>(file.bytesAvailable()));
+    sampleData.fill(0);
+
+    file.seek(file.headerLength());
+        for(int i = 0; !file.atEnd(); i++){
+                file.read(buffer.data(),byteToRead);
+                switch(byteToRead){
+                    case 1:
+                        quint8 *sample8;
+                        sample8 = reinterpret_cast<quint8*>(buffer.data());
+                        sampleData[i]=*sample8;///65536.0;
+                        break;
+                    case 2:
+                        quint16 *sample16;
+                        sample16 = reinterpret_cast<quint16*>(buffer.data());
+                        sampleData[i]=*sample16;///65536.0;
+                        break;
+                    case 3:
+                        quint32 *sample32;
+                        sample32 = reinterpret_cast<quint32*>(buffer.data());
+                        sampleData[i]=*sample32;///65536.0;
+                        break;
+                }
+                qDebug() << i;
+        }
+}
+
 void Spektogram::calculateFFT(){
 
     _windowsX = 0;
-    quint16 byteToRead = _bitsPerSample/8;
-    qDebug() << byteToRead;
     magnitudes.clear();
-    qDebug()<<_fftSize;
-
     fftData.resize(_fftSize);
     fftData.fill(1);
     magnitudeData.resize(_fftSize/2);
     phaseData.resize(_fftSize/2);
-
-    QByteArray buffer;
-    quint32 *sample;
-    QVector<qreal> sampleData;
     qint32 fftSizeHalf = _fftSize/2;
-    sampleData.resize(_fftSize);
     file.seek(file.headerLength());
-        for(int l = 0; !file.atEnd(); l++){
+    QVector<qreal> sampleFFTData;
+    qDebug() << "FFF";
+        for(QVector<qreal>::iterator wsk = sampleData.begin(); wsk != sampleData.end();){
             _windowsX++;
-            sampleData.fill(0);
-
-            for(int i = 0; i<_fftSize; i++){
-                if (file.atEnd()){
-                    break;
-                }
-                file.read(buffer.data(),byteToRead);
-                sample = reinterpret_cast<quint32*>(buffer.data());
-                sampleData[i]=*sample;///65536.0;
+            sampleFFTData.clear();
+            sampleFFTData.resize(_fftSize);
+            for(int i = 0; ((wsk != sampleData.end() && i<_fftSize)); i++){
+                sampleFFTData[i] = *wsk;
+                wsk++;
             }
 
-
             for(int i=0;i<_fftSize; i++){
-                fftData[static_cast<uint>(i)].real(sampleData[i]*fftWin[i]);
+                fftData[static_cast<uint>(i)].real(sampleFFTData[i]*fftWin[i]);
                 fftData[static_cast<uint>(i)].imag(0);
             }
 
@@ -315,10 +326,6 @@ void Spektogram::on_fftComboBox_activated(const QString &arg1)
     makePlot();
 }
 
-void Spektogram::on_fftComboBox_currentIndexChanged(const QString &arg1)
-{
-
-}
 
 void Spektogram::on_true_radioButton_clicked()
 {
@@ -330,4 +337,15 @@ void Spektogram::on_false_radioButton_clicked()
 {
     interpol = false;
     makePlot();
+}
+
+void Spektogram::on_actionNewFile_triggered()
+{
+    const QString fileName = QFileDialog::getOpenFileName(this, tr("Open WAV file"), "*.wav");
+
+    if(file.open(fileName)){
+        loadFile();
+    } else{
+        QMessageBox::warning(this,"Błąd","Błąd odczytu pliku.");
+    }
 }
