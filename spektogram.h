@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <QtMath>
 #include <QMessageBox>
+#include <QProgressBar>
 #include <armadillo>
 #include "wavfile.h"
 #include <QPainter>

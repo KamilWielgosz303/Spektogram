@@ -179,7 +179,7 @@ void Spektogram::readDataFile(){
     magnitudes.clear();
 
     QByteArray buffer;
-    sampleData.resize(static_cast<int>(file.bytesAvailable()));
+    sampleData.resize(static_cast<int>(file.bytesAvailable()/byteToRead));
     sampleData.fill(0);
 
     file.seek(file.headerLength());
@@ -202,7 +202,7 @@ void Spektogram::readDataFile(){
                         sampleData[i]=*sample32;///65536.0;
                         break;
                 }
-                qDebug() << i;
+                //qDebug() << i;
         }
 }
 
@@ -210,6 +210,7 @@ void Spektogram::calculateFFT(){
 
     _windowsX = 0;
     magnitudes.clear();
+    fftData.clear();
     fftData.resize(_fftSize);
     fftData.fill(1);
     magnitudeData.resize(_fftSize/2);
@@ -218,6 +219,7 @@ void Spektogram::calculateFFT(){
     file.seek(file.headerLength());
     QVector<qreal> sampleFFTData;
     qDebug() << "FFF";
+    int i = 0;
         for(QVector<qreal>::iterator wsk = sampleData.begin(); wsk != sampleData.end();){
             _windowsX++;
             sampleFFTData.clear();
