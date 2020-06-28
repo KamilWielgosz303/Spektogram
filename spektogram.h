@@ -7,7 +7,7 @@
 #include <QDebug>
 #include <QtMath>
 #include <QMessageBox>
-#include <QProgressBar>
+#include <QProgressDialog>
 #include <armadillo>
 #include "wavfile.h"
 #include <QPainter>
@@ -27,7 +27,6 @@ public:
 
 private slots:
 
-    //void on_dial_valueChanged(int value);
     void on_actionNewFile_triggered();
 
     void on_actionDrawSpectogram_triggered();
@@ -50,8 +49,8 @@ private:
     QVector<qreal> fftWin;
     QVector<QVector<qreal>> magnitudes;
     qint32 _Fs;                                         //Liczba próbek pliku wav
-    int _windowsY;                             //Dokladnosc w Hz , z jaka mozemy wyswietlac punkty spektogramu
-    int _windowsX{0};                               //Wynik dzielenia całego pliku na mniejsze okna
+    int _windowsY;                                  //Dokladnosc w Hz , z jaka mozemy wyswietlac punkty spektogramu
+    int _windowsX{0};                               //Podział osi X
     qint64 soundLength;
     quint16 _numberChannels;
     quint32 _samplesPerSec;

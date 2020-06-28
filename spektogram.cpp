@@ -149,22 +149,26 @@ void Spektogram::loadFile(){
              << file.bytesAvailable() << endl
              << file.size();
     qDebug() << "Dlugosc:" << soundLength;
-    _Fs = _samplesPerSec/2;
-    tempMagn.resize(_Fs);
-    tempMagn.fill(1);
-    readDataFile();
-    calculateFFT();
-    makePlot();
+    if(_numberChannels == 1){
+        _Fs = _samplesPerSec/2;
+        tempMagn.resize(_Fs);
+        tempMagn.fill(1);
+        readDataFile();
+        calculateFFT();
+        makePlot();
 
-    if(!ui->fftComboBox->isEnabled())
-        ui->fftComboBox->setEnabled(true);
-    if(!ui->oknoComboBox->isEnabled())
-        ui->oknoComboBox->setEnabled(true);
+        if(!ui->fftComboBox->isEnabled())
+            ui->fftComboBox->setEnabled(true);
+        if(!ui->oknoComboBox->isEnabled())
+            ui->oknoComboBox->setEnabled(true);
 
-    if(!ui->true_radioButton->isEnabled())
-        ui->true_radioButton->setEnabled(true);
-    if(!ui->false_radioButton->isEnabled())
-        ui->false_radioButton->setEnabled(true);
+        if(!ui->true_radioButton->isEnabled())
+            ui->true_radioButton->setEnabled(true);
+        if(!ui->false_radioButton->isEnabled())
+            ui->false_radioButton->setEnabled(true);
+    }else{
+        QMessageBox::warning(this,"Błąd","Program obsługuje tylko pliki Mono - jednokanałowe. Prosze wczytać inny plik.");
+    }
 }
 
 void Spektogram::on_actionDrawSpectogram_triggered()

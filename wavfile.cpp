@@ -36,27 +36,6 @@ bool WavFile::readHeader()
             && memcmp(&header.WAVE, "WAVE", 4) == 0
             && memcmp(&header.fmt, "fmt ", 4) == 0
             && (header.AudioFormat == 1 || header.AudioFormat == 0)) {
-
-            // Read off remaining header information
-            //DATAHeader dataHeader;
-            //lengthData = header.wave.dataSize;
-            //channelsNumber = header.wave.numChannels;
-            //data = QString(header.wave.dataString);
-
-//            if (qFromLittleEndian<quint32>(header.Subchunk1Size) > sizeof(WAVEHeader)) {
-//                // Extended data available
-//                quint16 extraFormatBytes;
-//                if (peek((char*)&extraFormatBytes, sizeof(quint16)) != sizeof(quint16))
-//                    return false;
-//                const qint64 throwAwayBytes = sizeof(quint16) + qFromLittleEndian<quint16>(extraFormatBytes);
-//                if (read(throwAwayBytes).size() != throwAwayBytes)
-//                    return false;
-//            }
-
-//            if (read((char*)&dataHeader, sizeof(DATAHeader)) != sizeof(DATAHeader))
-//                return false;
-
-            // Establish format
             if (memcmp(&header.RIFF, "RIFF", 4) == 0)
                 m_fileFormat.setByteOrder(QAudioFormat::LittleEndian);
             else
