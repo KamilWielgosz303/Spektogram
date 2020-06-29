@@ -7,10 +7,8 @@
 #include <QDebug>
 #include <QtMath>
 #include <QMessageBox>
-#include <QProgressDialog>
 #include <armadillo>
 #include "wavfile.h"
-#include <QPainter>
 #include "qcustomplot.h"
 
 QT_BEGIN_NAMESPACE
@@ -41,33 +39,33 @@ private slots:
 
 private:
     Ui::Spektogram *ui;
-    WavFile file;
-    arma::cx_vec fftData;
-    QVector<qreal> magnitudeData;
-    QVector<qreal> tempMagn;
-    QVector<qreal> phaseData;
-    QVector<qreal> fftWin;
-    QVector<QVector<qreal>> magnitudes;
+    WavFile _file;
+    arma::cx_vec _fftData;
+    QVector<qreal> _magnitudeData;
+    QVector<qreal> _tempMagn;
+    QVector<qreal> _fftWin;
+    QVector<QVector<qreal>> _magnitudes;
     qint32 _Fs;                                         //Liczba próbek pliku wav
     int _windowsY;                                  //Dokladnosc w Hz , z jaka mozemy wyswietlac punkty spektogramu
     int _windowsX{0};                               //Podział osi X
-    qint64 soundLength;
+    qint64 _soundLength;
     quint16 _numberChannels;
     quint32 _samplesPerSec;
     quint32 _bytesPerSec;
     quint16 _blockAlign;
     quint16 _bitsPerSample;
-    QVector<qreal> sampleData;
+    QVector<qreal> _sampleData;
 
-    bool interpol;
-    QCPColorMap *colorMap;
-    QCPColorScale *amplitudy;
+    bool _interpol{false};
+    QCPColorMap *_colorMap;
+    QCPColorScale *_amplitudy;
     int _fftSize;                                //Przy czestotliwosci 8000 rozdzielczosc czestotliwosciowa = 15,625 Hz        (8000/512)
     void loadFile();
     void calculateFFT();
     void makePlot();
     void chooseWindow(int i);
     void readDataFile();
+    void setDesc();
 
 };
 #endif // SPEKTOGRAM_H
