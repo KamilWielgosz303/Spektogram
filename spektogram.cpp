@@ -15,13 +15,14 @@ Spektogram::Spektogram(QWidget *parent)
                                           "4096",
                                           "8192"});
 
-    ui->oknoComboBox->addItems(QStringList{"Prostokątne",
-                                           "Hanna",
-                                           "Hamminga",
-                                           "Barletta",
-                                           "Trójkątne",
-                                           "Barletta-Hanna",
-                                           "Blackmana"});
+    ui->oknoComboBox->addItems(QStringList{"Rectangular",
+                                           "Hann",
+                                           "Hamming",
+                                           "Barlett",
+                                           "Triangular",
+                                           "Barlett-Hann",
+                                           "Blackman",
+                                           "Flat-Top"});
 
 
 
@@ -40,7 +41,7 @@ Spektogram::Spektogram(QWidget *parent)
 
     ui->customPlot->plotLayout()->addElement(0, 1, amplitudy);
     amplitudy->setType(QCPAxis::atRight);
-    amplitudy->axis()->setLabel("Amplituda [dB]");
+    amplitudy->axis()->setLabel("Magnitude [dB]");
     colorMap->setColorScale(amplitudy); // associate the color map with the color scale
 }
 
@@ -111,7 +112,7 @@ void Spektogram::chooseWindow(int i){
         break;
     }
 
-    case 11:                         // flat-top o malej rozdzielczosci
+    case 7:                         // flat-top o malej rozdzielczosci
     {
         double a0 = 1;
         double a1 = 1.93;
@@ -156,6 +157,12 @@ void Spektogram::loadFile(){
         readDataFile();
         calculateFFT();
         makePlot();
+
+        ui->numChan->setText(QString::number(_numberChannels) + " channel");
+        ui->sampSec->setText(QString::number(_samplesPerSec) + " samples/sec");
+        ui->bitsSamp->setText(QString::number(_bitsPerSample) + " bits/sample");
+        ui->flength->setText(QString::number(soundLength) + " ms");
+
 
         if(!ui->fftComboBox->isEnabled())
             ui->fftComboBox->setEnabled(true);
@@ -218,7 +225,7 @@ void Spektogram::calculateFFT(){
     fftData.resize(_fftSize);
     fftData.fill(1);
     magnitudeData.resize(_fftSize/2);
-    phaseData.resize(_fftSize/2);
+    //phaseData.resize(_fftSize/2);
     qint32 fftSizeHalf = _fftSize/2;
     file.seek(file.headerLength());
     QVector<qreal> sampleFFTData;
@@ -242,7 +249,7 @@ void Spektogram::calculateFFT(){
 
             for(int i=0;i<fftSizeHalf; i++){
                 magnitudeData[i]=abs(fftData[static_cast<uint>(i)]);
-                phaseData[i]=arg(fftData[static_cast<uint>(i)]);
+                //phaseData[i]=arg(fftData[static_cast<uint>(i)]);
             }
 
 
