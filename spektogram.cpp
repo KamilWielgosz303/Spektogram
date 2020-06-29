@@ -146,6 +146,7 @@ void Spektogram::loadFile(){
              << _file.bytesAvailable() << endl
              << _file.size();
     qDebug() << "Dlugosc:" << _soundLength;
+    if(_numberChannels == 1){
         _Fs = _samplesPerSec/2;
         _tempMagn.resize(_Fs);
         _tempMagn.fill(1);
@@ -164,6 +165,9 @@ void Spektogram::loadFile(){
             ui->true_radioButton->setEnabled(true);
         if(!ui->false_radioButton->isEnabled())
             ui->false_radioButton->setEnabled(true);
+    }else{
+        QMessageBox::warning(this,"Błąd","Program obsługuje tylko pliki Mono - jednokanałowe. Prosze wczytać inny plik.");
+    }
 }
 
 void Spektogram::on_actionDrawSpectogram_triggered()
